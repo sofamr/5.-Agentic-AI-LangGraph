@@ -89,5 +89,29 @@ graph_builder.add_conditional_edges(
     lambda state :state.get("next"),
     {"therapist": "therapist", "logical":"logical"}
 )
+graph_builder.add_edge("therapist", END)
+graph_builder.add_edge("logical", END)
 
 graph = graph_builder.compile()
+
+def run_chatbot():
+    state = {"messages": [], "messages_type": None}
+
+    while True:
+        user_input = input("Messages: ")
+        if user_input == "exit":
+            print("Bye")
+            break
+
+        state["messages"] = state.get("messages", []) + [
+            {"role": "user", "content": user_input}
+        ]
+
+        state = graph.invoke(state)
+
+        if state.get("messages") and len(state["messages"]) > 0:
+            last_message = state["message"][-1]
+            print(f"Assitant: {last_message.content}")
+
+if __name__ == "__main__":
+    run_chatbot
