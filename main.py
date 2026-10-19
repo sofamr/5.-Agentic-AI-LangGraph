@@ -23,7 +23,7 @@ class State(TypedDict):
     message_type: str | None
 
 def classify_message(state: State):
-    last_message = state["message"][-1]
+    last_message = state["messages"][-1]
     classifier_llm = llm.with_structured_output(MessageClassfifier)
 
     result = classifier_llm.invoke([
@@ -46,7 +46,7 @@ def router (state: State):
     return {"next": "logical"}
 
 def therapist_agent(state: State):
-    last_message = state[messages][-1]
+    last_message = state["messages"][-1]
 
     messages = [
         {"role":"system", "content": """You are a compassionate therapist. Focus on the emotional aspects of the user's message.
@@ -61,7 +61,7 @@ def therapist_agent(state: State):
     return {"messages": [{"role": "assistant", "content": reply.content}]}
 
 def logical_agent(state: State):
-    last_message = state[messages][-1]
+    last_message = state["messages"][-1]
     
     messages = [
         {"role":"system", "content": """You are a purely logical assistant. Focus only on facts and information.
@@ -95,10 +95,10 @@ graph_builder.add_edge("logical", END)
 graph = graph_builder.compile()
 
 def run_chatbot():
-    state = {"messages": [], "messages_type": None}
+    state = {"messages": [], "message_type": None}
 
     while True:
-        user_input = input("Messages: ")
+        user_input = input("Type a Message: ")
         if user_input == "exit":
             print("Bye")
             break
@@ -110,8 +110,8 @@ def run_chatbot():
         state = graph.invoke(state)
 
         if state.get("messages") and len(state["messages"]) > 0:
-            last_message = state["message"][-1]
+            last_message = state["messages"][-1]
             print(f"Assitant: {last_message.content}")
 
 if __name__ == "__main__":
-    run_chatbot
+    run_chatbot()
